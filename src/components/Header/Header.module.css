@@ -1,0 +1,16 @@
+.header {
+    padding-inline: 16rem;
+    padding-block: 1rem;
+    background-color: var(--bg-color);
+    & ul {
+        display: flex;
+        gap: 2rem;
+        list-style-type: none;
+        & li > .link-label {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+    }
+}
