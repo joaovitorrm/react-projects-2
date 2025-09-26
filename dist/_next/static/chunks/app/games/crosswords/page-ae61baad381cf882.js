@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[38],{5603:(s,e,_)=>{Promise.resolve().then(_.t.bind(_,9572,23))},9572:s=>{s.exports={crosswords:"page_crosswords__FW_7S"}}},s=>{s.O(0,[807,441,255,358],()=>s(s.s=5603)),_N_E=s.O()}]);
