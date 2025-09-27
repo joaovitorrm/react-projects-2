@@ -4,6 +4,4 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    flex: 1;
-    background-color: var(--bg-color);
 }
