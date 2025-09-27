@@ -4,12 +4,13 @@
     height: 18rem;
     aspect-ratio: 4/6;
 
-    & .link-image,
-    img {
+    & .link-image {
         width: 100%;
-        height: auto;
-        border-radius: 1vmin;
+        aspect-ratio: 4/3;
         position: relative;
+        & .image {
+            border-radius: 1vmin;
+        }
     }
 
     & .link-name {
