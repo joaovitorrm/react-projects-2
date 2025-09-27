@@ -1,16 +1,21 @@
 .header {
     padding-inline: 16rem;
     padding-block: 1rem;
-    background-color: var(--bg-color);
+    background-color: var(--header-bg-color);
     & ul {
         display: flex;
         gap: 2rem;
         list-style-type: none;
-        & li > .link-label {
+        & li > .label {
             text-decoration: none;
             color: var(--text-color);
             font-size: 1.2rem;
             text-transform: uppercase;
+            color: hsl(0, 0%, 60%);
+            &.active {
+                text-decoration: underline;
+                color: hsl(0, 0%, 100%);
+            }
         }
     }
 }

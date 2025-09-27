@@ -1,8 +1,8 @@
 import path from "path";
 import fs from "fs";
-import Link from "next/link";
 
 import styles from "./page.module.css";
+import Game from "@/components/Game/Game";
 
 export default function Games() {
 
@@ -26,12 +26,9 @@ export default function Games() {
 
     return (
         <main className={styles.main}>
-            <h1>Games</h1>
             <ul>
-                {projects.map((project) => (
-                    <li key={project.folder}>
-                        <Link href={`/games/${project.folder}`}>{project.name}</Link>
-                    </li>
+                {projects.map((project, index) => (
+                    <Game key={index} {...project} />
                 ))}
             </ul>
         </main>

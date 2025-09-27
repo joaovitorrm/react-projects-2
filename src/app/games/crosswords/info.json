@@ -1,5 +1,7 @@
 {
-    "name": "Crosswords",
-    "description": "Crosswords",
-    "version": "1.0"
+    "name": "Cruzadinhas",
+    "description": "Encontre as palavras escondidas no tabuleiro de cruzadas.",
+    "version": "1.0",
+    "imagePath": "placeholder.jpg",
+    "link": "games/crosswords"
 }
