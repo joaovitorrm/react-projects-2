@@ -90,7 +90,7 @@ function reducer(state: State, action: Action) {
 
         case "GENERATE_GRID": {
 
-            let grid = [];
+            const grid = [];
             for (let y = 0; y < action.payload; y++) {
                 grid[y] = [] as string[];
                 for (let x = 0; x < action.payload; x++) {
@@ -137,7 +137,7 @@ function isAligned8Directions(line: Line) {
 
 export default function Crosswords() {
 
-    let gridSize = 10;
+    const gridSize = 10;
     const [state, dispatch] = useReducer(reducer, { grid: [], draweds: [], tileSize: 0, tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } }, dragging: false });
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -148,7 +148,7 @@ export default function Crosswords() {
         if (state.grid.length === 0) {
             dispatch({ type: "GENERATE_GRID", payload: gridSize });
         }
-    }, []);
+    });
 
     useEffect(() => {
         if (crosswordsRef.current && canvasRef.current) {
