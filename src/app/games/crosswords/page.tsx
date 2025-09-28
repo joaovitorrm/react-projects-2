@@ -100,7 +100,7 @@ function reducer(state: State, action: Action) {
             for (let i = 0; i < wordsAmount; i++) {
                 const randomWord = words.splice(Math.floor(Math.random() * words.length), 1)[0];
 
-                let directionsPath = {
+                const directionsPath = {
                     up: { x: 0, y: -1 },
                     down: { x: 0, y: 1 },
                     left: { x: -1, y: 0 },
@@ -112,7 +112,7 @@ function reducer(state: State, action: Action) {
                 }
 
                 for (let c = 0; c < wordsAmount * 10; c++) {
-                    let directions = {
+                    const directions = {
                         up: false,
                         down: false,
                         left: false,
