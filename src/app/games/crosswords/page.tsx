@@ -93,7 +93,7 @@ function reducer(state: State, action: Action) {
 
             const grid = Array.from({ length: action.payload.size }, () => Array.from({ length: action.payload.size }, () => ""));
 
-            const wordsAmount = 10;
+            const wordsAmount = 16;
             const words = [...palavrasJSON.palavras] as string[];
             const usedWords = [] as string[];
 

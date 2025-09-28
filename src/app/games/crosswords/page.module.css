@@ -37,15 +37,19 @@
 
 .words {
     height: 20rem;
-    width: 10rem;
+    width: 12rem;
     background-color: red;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 0.5rem;
     border-radius: 1vmin;
     background-color: hsl(0, 100%, 90%);
     font-weight: bold;
     text-transform: uppercase;
+    flex-wrap: wrap;
+    & span {
+        padding-left: 0.4rem;
+    }
 }
