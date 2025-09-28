@@ -1,11 +1,12 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  output: 'export', // se você está usando GitHub Pages precisa exportar
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+  images: {
+    unoptimized: true, // obrigatório para Pages (sem Image Optimization server)
+  },
+}
 
-const nextConfig: NextConfig = {
-  images: {unoptimized: true},
-  basePath: "/react-projects-2",
-  assetPrefix: "/react-projects-2/",
-  output: "export",
-  /* config options here */
-};
-
-export default nextConfig;
+module.exports = nextConfig
