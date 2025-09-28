@@ -1,10 +1,12 @@
 .main {
     display: flex;
     align-items: center;
+    justify-content: center;
+    justify-items: center;
+    gap: 2rem;
 }
 
-.crosswords {    
-    margin: auto;
+.crosswords {
     width: 30rem;
     border-radius: 1vmin;
     aspect-ratio: 1/1;
@@ -23,6 +25,7 @@
         align-items: center;
         border-radius: 1vmin;
         user-select: none;
+        text-transform: uppercase;
     }
     & .canvas {
         position: absolute;
@@ -30,4 +33,19 @@
         height: 100%;
         pointer-events: none;
     }
+}
+
+.words {
+    height: 20rem;
+    width: 10rem;
+    background-color: red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 1vmin;
+    background-color: hsl(0, 100%, 90%);
+    font-weight: bold;
+    text-transform: uppercase;
 }
