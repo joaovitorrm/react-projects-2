@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
-const repoName = "react-projects-2";
-
 const nextConfig: NextConfig = {
-  basePath: `/${repoName}`,
-  assetPrefix: `/${repoName}/`,
+  assetPrefix: "/react-projects-2/",
   /* config options here */
 };
 
