@@ -76,10 +76,12 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
       - name: Debug: show env + out files (helps ver onde falha)
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: |
           echo ">>> NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH"
           echo ">>> NEXT_PUBLIC_ASSET_PREFIX=$NEXT_PUBLIC_ASSET_PREFIX"
-          echo ">>> steps.pages.outputs.base_path = ${{ steps.pages.outputs.base_path }}"
+          echo ">>> steps.pages.outputs.base_path = $BASE_PATH"
           echo "Contents of ./out (if exists):"
           ls -la ./out || true
           if [ -f ./out/index.html ]; then
