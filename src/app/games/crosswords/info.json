@@ -2,6 +2,6 @@
     "name": "Cruzadinhas",
     "description": "Encontre as palavras escondidas no tabuleiro de cruzadas.",
     "version": "1.0",
-    "imagePath": "placeholder.jpg",
+    "imagePath": "/placeholder.jpg",
     "link": "games/crosswords"
 }

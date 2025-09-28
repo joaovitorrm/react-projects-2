@@ -29,7 +29,7 @@ interface State {
 type Action =
     { type: "GENERATE_GRID", payload: { size: number } } |
     { type: "HANDLE_MOUSE_DOWN", payload: { e: EventTarget, position: { x: number, y: number } } } |
-    { type: "HANDLE_MOUSE_UP", payload: { e: EventTarget, position: { x: number, y: number } } } |
+    { type: "HANDLE_MOUSE_UP", payload: { e: EventTarget, position: { x: number, y: number }, color: string } } |
     { type: "HANDLE_MOUSE_MOVE", payload: { position: { x: number, y: number } } };
 
 function reducer(state: State, action: Action) {
@@ -63,7 +63,7 @@ function reducer(state: State, action: Action) {
 
         case "HANDLE_MOUSE_MOVE": {
 
-            if (state.tempLine.start.x === action.payload.position.x && state.tempLine.start.y === action.payload.position.y) {
+            if (!state.dragging) {
                 return state;
             }
 
@@ -78,7 +78,7 @@ function reducer(state: State, action: Action) {
         case "HANDLE_MOUSE_UP": {
 
             if (isAligned8Directions(state.tempLine)) {
-                const drawed = { word: "", line: state.tempLine, color: colors[Math.floor(Math.random() * colors.length)] };
+                const drawed = { word: "", line: state.tempLine, color: action.payload.color };
                 return { ...state, draweds: [...state.draweds, drawed], tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } }, dragging: false };
             }
 
@@ -97,19 +97,19 @@ function reducer(state: State, action: Action) {
             const words = [...palavrasJSON.palavras] as string[];
             const usedWords = [] as string[];
 
+            const directionsPath = {
+                up: { x: 0, y: -1 },
+                down: { x: 0, y: 1 },
+                left: { x: -1, y: 0 },
+                right: { x: 1, y: 0 },
+                upRight: { x: 1, y: -1 },
+                downRight: { x: 1, y: 1 },
+                downLeft: { x: -1, y: 1 },
+                upLeft: { x: -1, y: -1 }
+            }
+
             for (let i = 0; i < wordsAmount; i++) {
                 const randomWord = words.splice(Math.floor(Math.random() * words.length), 1)[0];
-
-                const directionsPath = {
-                    up: { x: 0, y: -1 },
-                    down: { x: 0, y: 1 },
-                    left: { x: -1, y: 0 },
-                    right: { x: 1, y: 0 },
-                    upRight: { x: 1, y: -1 },
-                    downRight: { x: 1, y: 1 },
-                    downLeft: { x: -1, y: 1 },
-                    upLeft: { x: -1, y: -1 }
-                }
 
                 for (let c = 0; c < wordsAmount * 10; c++) {
                     const directions = {
@@ -222,6 +222,7 @@ export default function Crosswords() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const crosswordsRef = useRef<HTMLDivElement | null>(null);
+    const colorRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         if (state.grid.length === 0) {
@@ -254,6 +255,10 @@ export default function Crosswords() {
 
     return (
         <main className={styles.main}>
+            <div>
+                <img src="/color-picker.png" alt="color_picker" />
+                <input type="color" ref={colorRef} />                
+            </div>
             <div className={styles.crosswords} style={{ ["--size" as string]: gridSize }} ref={crosswordsRef}>
                 {state.grid.map((row, y) => (
                     row.map((letter, x) => (
@@ -273,7 +278,8 @@ export default function Crosswords() {
                                     type: "HANDLE_MOUSE_UP",
                                     payload: {
                                         e: e.target,
-                                        position: { x, y }
+                                        position: { x, y },
+                                        color: colorRef.current?.value || colors[Math.floor(Math.random() * colors.length)]
                                     }
                                 })
                             }
@@ -294,7 +300,7 @@ export default function Crosswords() {
             </div>
             <div className={styles.words}>
                 {state.words.sort().map((word, index) => (
-                    <span key={index}>{word}</span>
+                    <span key={index} className={Math.random() > 0.5 ? styles["active"] : styles["inactive"]}>{word}</span>
                 ))}
             </div>
         </main>

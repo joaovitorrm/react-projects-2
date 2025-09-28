@@ -36,20 +36,25 @@
 }
 
 .words {
-    height: 20rem;
-    width: 12rem;
-    background-color: red;
+    width: 14rem;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 1vmin;
-    background-color: hsl(0, 100%, 90%);
     font-weight: bold;
     text-transform: uppercase;
     flex-wrap: wrap;
     & span {
-        padding-left: 0.4rem;
+        padding-block: 0.3rem;
+        padding-inline: 0.6rem;
+        background-color: hsl(0, 0%, 90%);
+        border-radius: 1vmin;
+        box-shadow: 1px 3px hsl(0, 0%, 40%);
+        &.inactive {
+            box-shadow: 1px 1px hsl(0, 0%, 20%);
+            transform: translateY(2px);
+            background-color: hsl(0, 0%, 60%);
+            text-decoration: line-through;
+            color: hsl(0, 0%, 30%);
+        }
     }
 }
