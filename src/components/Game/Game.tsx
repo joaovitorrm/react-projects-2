@@ -14,7 +14,7 @@ export default function Game(props: GameProps) {
     return (
         <div className={styles.game}>
             <Link href={props.link} className={styles["link-image"]}>
-                <Image src={props.imagePath} alt="img" fill={true} className={styles.image} />
+                <img src={props.imagePath} alt="img" className={styles.image} />
                 <span className={styles.version}>{props.version}</span>
             </Link>
             <Link href={props.link} className={styles["link-name"]}>

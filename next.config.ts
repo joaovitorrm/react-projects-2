@@ -1,13 +1,11 @@
-/** @type {import('next').NextConfig} */
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
-const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || ''
+import type { NextConfig } from "next";
 
-module.exports = {
-  reactStrictMode: true,
-  output: 'export',         // importantíssimo para Next 15 exports estáticos
-  basePath,
-  assetPrefix,
-  images: {
-    unoptimized: true,     // necessário para GitHub Pages (sem image optimization server)
-  },
-}
+const repoName = "react-projects-2";
+
+const nextConfig: NextConfig = {
+  basePath: `/${repoName}`,
+  assetPrefix: `/${repoName}/`,
+  /* config options here */
+};
+
+export default nextConfig;
