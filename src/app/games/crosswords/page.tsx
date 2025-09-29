@@ -332,9 +332,11 @@ export default function Crosswords() {
             const touch = type === "end" ? e.changedTouches[0] : e.touches[0];
             const rect = div.getBoundingClientRect();
             let x = Math.floor((touch.clientX - rect.left) / state.tileSize);
-            if (x > gridSize - 1) x = gridSize - 1;            
+            if (x > gridSize - 1) x = gridSize - 1;
+            if (x < 0) x = 0;
             let y = Math.floor((touch.clientY - rect.top) / state.tileSize);
             if (y > gridSize - 1) y = gridSize - 1;
+            if (y < 0) y = 0;
 
             e.preventDefault();
 
