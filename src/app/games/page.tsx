@@ -3,6 +3,8 @@ import fs from "fs";
 
 import styles from "./page.module.css";
 import Game from "@/components/Game/Game";
+import PlaceholderImage from "@/assets/util/placeholder.jpg";
+import { covers } from "@/assets/covers";
 
 export default function Games() {
 
@@ -10,14 +12,21 @@ export default function Games() {
     const files = fs.readdirSync(gamesFolder);
 
     const projects = files
-        .map((arquivo) => {
+        .map((folder) => {
             try {
                 const data = fs.readFileSync(
-                    path.join(gamesFolder, arquivo, "info.json"),
+                    path.join(gamesFolder, folder, "info.json"),
                     "utf-8"
                 );
                 const info = JSON.parse(data);
-                return { ...info, folder: arquivo };
+
+                if (!covers[info.image]) {
+                    info.image = PlaceholderImage;
+                } else {
+                    info.image = covers[info.image];
+                }
+
+                return { ...info };
             } catch {
                 return null;
             }
