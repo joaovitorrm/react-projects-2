@@ -1,10 +1,24 @@
 "use client";
 
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import styles from "./page.module.css";
 import palavrasJSON from "./palavras.json";
 
-const colors = ["orange", "blue", "green", "red", "yellow", "purple"];
+const colors = [
+    "hsl(0, 100%, 50%)",
+    "hsl(25, 100%, 50%)",
+    "hsl(50, 100%, 50%)",
+    "hsl(100, 100%, 50%)",
+    "hsl(180, 100%, 50%)",
+    "hsl(220, 100%, 50%)",
+    "hsl(260, 100%, 50%)",
+];
+
+type ColorType =
+    { type: "selector", color: string } |
+    { type: "option", color: string } |
+    { type: "rainbow", color: string };
+
 
 interface Line {
     start: { x: number, y: number },
@@ -14,7 +28,7 @@ interface Line {
 interface Drawed {
     word: string,
     line: Line,
-    color: string
+    color: ColorType
 }
 
 interface State {
@@ -29,7 +43,7 @@ interface State {
 type Action =
     { type: "GENERATE_GRID", payload: { size: number } } |
     { type: "HANDLE_MOUSE_DOWN", payload: { e: EventTarget, position: { x: number, y: number } } } |
-    { type: "HANDLE_MOUSE_UP", payload: { e: EventTarget, position: { x: number, y: number }, color: string } } |
+    { type: "HANDLE_MOUSE_UP", payload: { e: EventTarget, position: { x: number, y: number }, color: ColorType } } |
     { type: "HANDLE_MOUSE_MOVE", payload: { position: { x: number, y: number } } } |
     { type: "SET_TILE_SIZE", payload: { size: number } };
 
@@ -65,6 +79,7 @@ function reducer(state: State, action: Action) {
 
         case "HANDLE_MOUSE_UP": {
 
+            // CHECK IF IS ALIGNED 8 DIRECTIONS
             if (!isAligned8Directions(state.tempLine)) {
                 return {
                     ...state,
@@ -73,6 +88,7 @@ function reducer(state: State, action: Action) {
                 };
             }
 
+            // CHECK IF IS A VALID WORD
             const dx = state.tempLine.end.x - state.tempLine.start.x;
             const dy = state.tempLine.end.y - state.tempLine.start.y;
 
@@ -91,6 +107,29 @@ function reducer(state: State, action: Action) {
                 };
             }
 
+            // CHECK IF THE WORD IS ALREADY DRAWED THEN JUST CHANGE THE COLOR
+            const drawedsCopy = [...state.draweds];
+            const found = drawedsCopy.find(drawed => drawed.word === word);
+
+            let newColor: ColorType = {...action.payload.color};
+            if (newColor.type === "rainbow") {
+                const r = Math.floor(Math.random() * 256);
+                const g = Math.floor(Math.random() * 256);
+                const b = Math.floor(Math.random() * 256);
+                newColor.color = `rgb(${r}, ${g}, ${b})`;
+            }
+
+            if (found) {
+                found.color.color = newColor.color;
+                return {
+                    ...state,
+                    tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
+                    dragging: false,
+                    draweds: drawedsCopy
+                };
+            }
+
+            // DRAW THE LINE
             const drawedLine: Line = {
                 start: {
                     x: state.tempLine.start.x * state.tileSize + state.tileSize / 2,
@@ -102,7 +141,7 @@ function reducer(state: State, action: Action) {
                 }
             };
 
-            const drawed = { word: word, line: drawedLine, color: action.payload.color };
+            const drawed = { word: word, line: drawedLine, color: newColor };
             return { ...state, draweds: [...state.draweds, drawed], tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } }, dragging: false };
         }
 
@@ -239,7 +278,7 @@ export default function Crosswords() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const crosswordsRef = useRef<HTMLDivElement | null>(null);
-    const colorRef = useRef<HTMLInputElement | null>(null);
+    const [color, setColor] = useState<ColorType>({ type: "selector", color: "red" });
 
     useEffect(() => {
         if (state.grid.length === 0) {
@@ -264,7 +303,7 @@ export default function Crosswords() {
         contextRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
         for (const d of state.draweds) {
-            drawLine(contextRef.current, d.line, d.color);
+            drawLine(contextRef.current, d.line, d.color.color);
         }
 
         if (state.dragging) {
@@ -286,7 +325,25 @@ export default function Crosswords() {
     return (
         <main className={styles.main}>
             <div className={styles["color-picker"]}>
-                <input type="color" ref={colorRef} />
+                <input
+                    type="color"
+                    className={color.type === "selector" ? styles.selected : ""}
+                    defaultValue={"#ff0000"}
+                    onChange={(e) => setColor({ type: "selector", color: e.target.value })} />
+                {colors.map((colorHSL, i) => (
+                    <input
+                        key={i}
+                        className={`${styles["color-picker-option"]} ${color.type === "option" && color.color === colorHSL ? styles.selected : ""}`}
+                        style={{ ["--color" as string]: colorHSL }}
+                        type="button"
+                        onClick={() => setColor({ type: "option", color: colorHSL })}
+                    />
+                ))}
+                <input
+                    className={`${styles["color-picker-option"]} ${styles.rainbow} ${color.type === "rainbow" ? styles.selected : ""}`}
+                    type="button"
+                    onClick={() => setColor({ type: "rainbow", color: "rainbow" })}
+                />
             </div>
             <div className={styles.crosswords} style={{ ["--size" as string]: gridSize }} ref={crosswordsRef}>
                 {state.grid.map((row, y) => (
@@ -308,7 +365,7 @@ export default function Crosswords() {
                                     payload: {
                                         e: e.target,
                                         position: { x, y },
-                                        color: colorRef.current?.value || colors[Math.floor(Math.random() * colors.length)]
+                                        color: color
                                     }
                                 })
                             }

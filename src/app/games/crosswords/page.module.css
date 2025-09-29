@@ -15,6 +15,7 @@
     grid-template-columns: repeat(var(--size), 1fr);
     grid-template-rows: repeat(var(--size), 1fr);
     position: relative;
+
     & span {
         font-size: 1.4rem;
         background-color: hsl(0, 0%, 85%);
@@ -27,6 +28,7 @@
         user-select: none;
         text-transform: uppercase;
     }
+
     & .canvas {
         position: absolute;
         width: 100%;
@@ -43,12 +45,14 @@
     font-weight: bold;
     text-transform: uppercase;
     flex-wrap: wrap;
+
     & span {
         padding-block: 0.3rem;
         padding-inline: 0.6rem;
         background-color: hsl(0, 0%, 90%);
         border-radius: 1vmin;
         box-shadow: 1px 3px hsl(0, 0%, 40%);
+
         &.inactive {
             box-shadow: 1px 1px hsl(0, 0%, 20%);
             transform: translateY(2px);
@@ -59,17 +63,59 @@
     }
 }
 
-.color-picker {    
+.color-picker {
     width: 5rem;
-    height: 5rem;
-    & .color-picker-icon {
+    height: 24rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: center;
+    justify-content: center;
+
+    & .color-picker-option {
         display: block;
-        position: relative;
         width: 100%;
-        height: 100%;
+        height: 2rem;
+        background-color: var(--color);
+        border-radius: 0.6vmin;
+        border: none;
+        cursor: pointer;
+
+        &.rainbow {
+            background-color: none;
+            background: linear-gradient(135deg,
+                    rgba(255, 0, 0, 1) 0%,
+                    rgba(255, 154, 0, 1) 10%,
+                    rgba(208, 222, 33, 1) 20%,
+                    rgba(79, 220, 74, 1) 30%,
+                    rgba(63, 218, 216, 1) 40%,
+                    rgba(47, 201, 226, 1) 50%,
+                    rgba(28, 127, 238, 1) 60%,
+                    rgba(95, 21, 242, 1) 70%,
+                    rgba(186, 12, 248, 1) 80%,
+                    rgba(251, 7, 217, 1) 90%,
+                    rgba(255, 0, 0, 1) 100%);
+        }
     }
-    & input {
-        width: 100%;
-        height: 100%;
+
+    & input[type="color"] {
+        width: 5rem;
+        height: 5rem;
+        margin-bottom: 0.4rem;
+        appearance: none;
+        border-radius: 0.6vmin;
+        cursor: pointer;
+
+        &::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        &::-webkit-color-swatch {
+            border: none;
+        }
+    }
+
+    & .selected {
+        outline: 2px solid hsl(0, 0%, 90%);
     }
 }
