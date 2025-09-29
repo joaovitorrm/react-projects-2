@@ -1,6 +1,7 @@
 import Link from "next/link";
 import styles from "./Game.module.css";
 import Image from "next/image";
+import PlaceHolderImage from "../../../public/placeholder.jpg";
 
 interface GameProps {
     name: string,
@@ -14,7 +15,7 @@ export default function Game(props: GameProps) {
     return (
         <div className={styles.game}>
             <Link href={props.link} className={styles["link-image"]}>
-                <img src={props.imagePath} alt="img" className={styles.image} />
+                <Image src={PlaceHolderImage} alt="img" fill={true} className={styles.image} />
                 <span className={styles.version}>{props.version}</span>
             </Link>
             <Link href={props.link} className={styles["link-name"]}>

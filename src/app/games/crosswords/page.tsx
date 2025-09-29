@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef } from "react";
 import styles from "./page.module.css";
 import palavrasJSON from "./palavras.json";
 import Image from "next/image";
+import ColorPicker from "../../../../public/color-picker.png";
 
 const colors = ["orange", "blue", "green", "red", "yellow", "purple"];
 
@@ -31,34 +32,22 @@ type Action =
     { type: "GENERATE_GRID", payload: { size: number } } |
     { type: "HANDLE_MOUSE_DOWN", payload: { e: EventTarget, position: { x: number, y: number } } } |
     { type: "HANDLE_MOUSE_UP", payload: { e: EventTarget, position: { x: number, y: number }, color: string } } |
-    { type: "HANDLE_MOUSE_MOVE", payload: { position: { x: number, y: number } } };
+    { type: "HANDLE_MOUSE_MOVE", payload: { position: { x: number, y: number } } } |
+    { type: "SET_TILE_SIZE", payload: { size: number } };
 
 function reducer(state: State, action: Action) {
     switch (action.type) {
 
+        case "SET_TILE_SIZE": return { ...state, tileSize: action.payload.size };
+
         case "HANDLE_MOUSE_DOWN": {
-
-            let size = 0;
-            if (state.tileSize === 0) {
-                size = (action.payload.e as HTMLCanvasElement).offsetWidth;
-
-                const tempLine = {
-                    start: { x: (action.payload.position.x * size + size / 2), y: (action.payload.position.y * size + size / 2) },
-                    end: { x: (action.payload.position.x * size + size / 2), y: (action.payload.position.y * size + size / 2) }
-                };
-
-                return {
-                    ...state, tempLine: tempLine, tileSize: size === 0 ? state.tileSize : size, dragging: true
-                };
-            }
-
             const tempLine = {
                 start: { x: (action.payload.position.x * state.tileSize + state.tileSize / 2), y: (action.payload.position.y * state.tileSize + state.tileSize / 2) },
                 end: { x: (action.payload.position.x * state.tileSize + state.tileSize / 2), y: (action.payload.position.y * state.tileSize + state.tileSize / 2) }
             };
 
             return {
-                ...state, tempLine: tempLine, tileSize: size === 0 ? state.tileSize : size, dragging: true
+                ...state, tempLine: tempLine, dragging: true
             };
         }
 
@@ -229,15 +218,18 @@ export default function Crosswords() {
         if (state.grid.length === 0) {
             dispatch({ type: "GENERATE_GRID", payload: { size: gridSize } });
         }
-    });
+    }, []);
 
     useEffect(() => {
         if (crosswordsRef.current && canvasRef.current) {
             canvasRef.current.width = crosswordsRef.current.offsetWidth;
             canvasRef.current.height = crosswordsRef.current.offsetHeight;
             contextRef.current = canvasRef.current.getContext("2d");
+
+            const size = canvasRef.current.offsetWidth / gridSize;
+            dispatch({ type: "SET_TILE_SIZE", payload: { size } });
         }
-    }, [crosswordsRef.current]);
+    }, []);
 
     useEffect(() => {
         if (!contextRef.current || !canvasRef.current) return;
@@ -256,9 +248,11 @@ export default function Crosswords() {
 
     return (
         <main className={styles.main}>
-            <div>
-                <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH}/color-picker.png`} alt="color_picker" />
-                <input type="color" ref={colorRef} />                
+            <div className={styles["color-picker"]}>
+                <span className={styles["color-picker-icon"]}>
+                    <Image src={ColorPicker} alt="color_picker" fill={true} className={styles.image}/>
+                </span>                
+                <input type="color" ref={colorRef} />
             </div>
             <div className={styles.crosswords} style={{ ["--size" as string]: gridSize }} ref={crosswordsRef}>
                 {state.grid.map((row, y) => (

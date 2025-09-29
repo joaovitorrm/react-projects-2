@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BASE_PATH: isProd ? `/${repoName}` : "", // <- agora está disponível no client
   },
+  images: { unoptimized: true }
   /* config options here */
 };
 
