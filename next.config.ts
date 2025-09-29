@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   basePath: isProd ? `/${repoName}` : "",
   assetPrefix: isProd ? `/${repoName}/` : "",
   output: "export",
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProd ? `/${repoName}` : "", // <- agora está disponível no client
+  },
   /* config options here */
 };
 

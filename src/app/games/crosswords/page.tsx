@@ -3,6 +3,7 @@
 import { useEffect, useReducer, useRef } from "react";
 import styles from "./page.module.css";
 import palavrasJSON from "./palavras.json";
+import Image from "next/image";
 
 const colors = ["orange", "blue", "green", "red", "yellow", "purple"];
 
@@ -256,7 +257,7 @@ export default function Crosswords() {
     return (
         <main className={styles.main}>
             <div>
-                <img src="/color-picker.png" alt="color_picker" />
+                <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH}/color-picker.png`} alt="color_picker" />
                 <input type="color" ref={colorRef} />                
             </div>
             <div className={styles.crosswords} style={{ ["--size" as string]: gridSize }} ref={crosswordsRef}>
