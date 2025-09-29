@@ -52,7 +52,7 @@
         &.inactive {
             box-shadow: 1px 1px hsl(0, 0%, 20%);
             transform: translateY(2px);
-            background-color: hsl(0, 0%, 60%);
+            background-color: hsl(0, 0%, 50%);
             text-decoration: line-through;
             color: hsl(0, 0%, 30%);
         }

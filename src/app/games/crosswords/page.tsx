@@ -3,8 +3,6 @@
 import { useEffect, useReducer, useRef } from "react";
 import styles from "./page.module.css";
 import palavrasJSON from "./palavras.json";
-import Image from "next/image";
-import ColorPicker from "../../../../public/color-picker.png";
 
 const colors = ["orange", "blue", "green", "red", "yellow", "purple"];
 
@@ -42,8 +40,8 @@ function reducer(state: State, action: Action) {
 
         case "HANDLE_MOUSE_DOWN": {
             const tempLine = {
-                start: { x: (action.payload.position.x * state.tileSize + state.tileSize / 2), y: (action.payload.position.y * state.tileSize + state.tileSize / 2) },
-                end: { x: (action.payload.position.x * state.tileSize + state.tileSize / 2), y: (action.payload.position.y * state.tileSize + state.tileSize / 2) }
+                start: { x: (action.payload.position.x), y: (action.payload.position.y) },
+                end: { x: (action.payload.position.x), y: (action.payload.position.y) }
             };
 
             return {
@@ -60,23 +58,52 @@ function reducer(state: State, action: Action) {
             return {
                 ...state, tempLine: {
                     start: { x: state.tempLine.start.x, y: state.tempLine.start.y },
-                    end: { x: action.payload.position.x * state.tileSize + state.tileSize / 2, y: action.payload.position.y * state.tileSize + state.tileSize / 2 }
+                    end: { x: action.payload.position.x, y: action.payload.position.y }
                 }
             };
         }
 
         case "HANDLE_MOUSE_UP": {
 
-            if (isAligned8Directions(state.tempLine)) {
-                const drawed = { word: "", line: state.tempLine, color: action.payload.color };
-                return { ...state, draweds: [...state.draweds, drawed], tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } }, dragging: false };
+            if (!isAligned8Directions(state.tempLine)) {
+                return {
+                    ...state,
+                    tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
+                    dragging: false
+                };
             }
 
-            return {
-                ...state,
-                tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
-                dragging: false
+            const dx = state.tempLine.end.x - state.tempLine.start.x;
+            const dy = state.tempLine.end.y - state.tempLine.start.y;
+
+            const horizontalDir = Math.sign(dx); // -1 0 ou 1
+            const verticalDir = Math.sign(dy); // -1 0 ou 1
+
+            let word = Array.from({ length: (Math.max(Math.abs(dx), Math.abs(dy)) + 1) }, (_, i) =>
+                state.grid[state.tempLine.start.y + verticalDir * i][state.tempLine.start.x + horizontalDir * i]
+            ).join("");
+
+            if (!state.words.includes(word)) {
+                return {
+                    ...state,
+                    tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
+                    dragging: false
+                };
+            }
+
+            const drawedLine: Line = {
+                start: {
+                    x: state.tempLine.start.x * state.tileSize + state.tileSize / 2,
+                    y: state.tempLine.start.y * state.tileSize + state.tileSize / 2
+                },
+                end: {
+                    x: state.tempLine.end.x * state.tileSize + state.tileSize / 2,
+                    y: state.tempLine.end.y * state.tileSize + state.tileSize / 2
+                }
             };
+
+            const drawed = { word: word, line: drawedLine, color: action.payload.color };
+            return { ...state, draweds: [...state.draweds, drawed], tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } }, dragging: false };
         }
 
         case "GENERATE_GRID": {
@@ -241,7 +268,17 @@ export default function Crosswords() {
         }
 
         if (state.dragging) {
-            drawLine(contextRef.current, state.tempLine);
+            const linePos: Line = {
+                start: {
+                    x: state.tempLine.start.x * state.tileSize + state.tileSize / 2,
+                    y: state.tempLine.start.y * state.tileSize + state.tileSize / 2
+                },
+                end: {
+                    x: state.tempLine.end.x * state.tileSize + state.tileSize / 2,
+                    y: state.tempLine.end.y * state.tileSize + state.tileSize / 2
+                }
+            };
+            drawLine(contextRef.current, linePos);
         }
 
     }, [state.draweds, state.tempLine]);
@@ -249,9 +286,6 @@ export default function Crosswords() {
     return (
         <main className={styles.main}>
             <div className={styles["color-picker"]}>
-                <span className={styles["color-picker-icon"]}>
-                    <Image src={ColorPicker} alt="color_picker" fill={true} className={styles.image}/>
-                </span>                
                 <input type="color" ref={colorRef} />
             </div>
             <div className={styles.crosswords} style={{ ["--size" as string]: gridSize }} ref={crosswordsRef}>
@@ -295,7 +329,7 @@ export default function Crosswords() {
             </div>
             <div className={styles.words}>
                 {state.words.sort().map((word, index) => (
-                    <span key={index} className={Math.random() > 0.5 ? styles["active"] : styles["inactive"]}>{word}</span>
+                    <span key={index} className={state.draweds.find(d => d.word.toUpperCase() === word.toUpperCase()) ? styles.inactive : styles.active}>{word}</span>
                 ))}
             </div>
         </main>
