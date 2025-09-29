@@ -167,6 +167,8 @@ function reducer(state: State, action: Action) {
             for (let i = 0; i < wordsAmount; i++) {
                 const randomWord = words.splice(Math.floor(Math.random() * words.length), 1)[0];
 
+                if (randomWord.length > action.payload.size) continue;
+
                 for (let c = 0; c < wordsAmount * 10; c++) {
                     const directions = {
                         up: false,
