@@ -1,13 +1,13 @@
 import Link from "next/link";
 import styles from "./Game.module.css";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
 interface GameProps {
     name: string,
     description: string,
     version: string,
     link: string,
-    image: any
+    image: StaticImageData
 }
 
 export default function Game(props: GameProps) {
