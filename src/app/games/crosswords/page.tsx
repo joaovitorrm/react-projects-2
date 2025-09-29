@@ -79,7 +79,7 @@ function reducer(state: State, action: Action) {
             const horizontalDir = Math.sign(dx); // -1 0 ou 1
             const verticalDir = Math.sign(dy); // -1 0 ou 1
 
-            let word = Array.from({ length: (Math.max(Math.abs(dx), Math.abs(dy)) + 1) }, (_, i) =>
+            const word = Array.from({ length: (Math.max(Math.abs(dx), Math.abs(dy)) + 1) }, (_, i) =>
                 state.grid[state.tempLine.start.y + verticalDir * i][state.tempLine.start.x + horizontalDir * i]
             ).join("");
 
