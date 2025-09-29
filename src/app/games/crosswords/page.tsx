@@ -111,7 +111,7 @@ function reducer(state: State, action: Action) {
             const drawedsCopy = [...state.draweds];
             const found = drawedsCopy.find(drawed => drawed.word === word);
 
-            let newColor: ColorType = {...action.payload.color};
+            const newColor: ColorType = {...action.payload.color};
             if (newColor.type === "rainbow") {
                 const r = Math.floor(Math.random() * 256);
                 const g = Math.floor(Math.random() * 256);
