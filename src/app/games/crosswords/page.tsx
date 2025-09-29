@@ -331,8 +331,11 @@ export default function Crosswords() {
         const handleTouch = (type: "start" | "move" | "end", e: TouchEvent) => {
             const touch = type === "end" ? e.changedTouches[0] : e.touches[0];
             const rect = div.getBoundingClientRect();
-            const x = Math.floor((touch.clientX - rect.left) / state.tileSize);
-            const y = Math.floor((touch.clientY - rect.top) / state.tileSize);
+            let x = Math.floor((touch.clientX - rect.left) / state.tileSize);
+            if (x > gridSize - 1) x = gridSize - 1;            
+            let y = Math.floor((touch.clientY - rect.top) / state.tileSize);
+            if (y > gridSize - 1) y = gridSize - 1;
+
             e.preventDefault();
 
             if (type === "start") dispatch({ type: "HANDLE_MOUSE_DOWN", payload: { position: { x, y } } });
