@@ -42,8 +42,8 @@ interface State {
 
 type Action =
     { type: "GENERATE_GRID", payload: { size: number } } |
-    { type: "HANDLE_MOUSE_DOWN", payload: { e: EventTarget, position: { x: number, y: number } } } |
-    { type: "HANDLE_MOUSE_UP", payload: { e: EventTarget, position: { x: number, y: number }, color: ColorType } } |
+    { type: "HANDLE_MOUSE_DOWN", payload: { position: { x: number, y: number } } } |
+    { type: "HANDLE_MOUSE_UP", payload: { position: { x: number, y: number }, color: ColorType } } |
     { type: "HANDLE_MOUSE_MOVE", payload: { position: { x: number, y: number } } } |
     { type: "SET_TILE_SIZE", payload: { size: number } };
 
@@ -111,7 +111,7 @@ function reducer(state: State, action: Action) {
             const drawedsCopy = [...state.draweds];
             const found = drawedsCopy.find(drawed => drawed.word === word);
 
-            const newColor: ColorType = {...action.payload.color};
+            const newColor: ColorType = { ...action.payload.color };
             if (newColor.type === "rainbow") {
                 const r = Math.floor(Math.random() * 256);
                 const g = Math.floor(Math.random() * 256);
@@ -324,6 +324,37 @@ export default function Crosswords() {
 
     }, [state.draweds, state.tempLine]);
 
+    useEffect(() => {
+        const div = crosswordsRef.current;
+        if (!div) return;
+
+        const handleTouch = (type: "start" | "move" | "end", e: TouchEvent) => {
+            const touch = type === "end" ? e.changedTouches[0] : e.touches[0];
+            const rect = div.getBoundingClientRect();
+            const x = Math.floor((touch.clientX - rect.left) / state.tileSize);
+            const y = Math.floor((touch.clientY - rect.top) / state.tileSize);
+            e.preventDefault();
+
+            if (type === "start") dispatch({ type: "HANDLE_MOUSE_DOWN", payload: { position: { x, y } } });
+            if (type === "move") dispatch({ type: "HANDLE_MOUSE_MOVE", payload: { position: { x, y } } });
+            if (type === "end") dispatch({ type: "HANDLE_MOUSE_UP", payload: { position: { x, y }, color } });
+        };
+
+        const handleTouchStart = (e: TouchEvent) => handleTouch("start", e);
+        const handleTouchMove = (e: TouchEvent) => handleTouch("move", e);
+        const handleTouchEnd = (e: TouchEvent) => handleTouch("end", e);
+
+        div.addEventListener("touchstart", handleTouchStart);
+        div.addEventListener("touchmove", handleTouchMove, { passive: false });
+        div.addEventListener("touchend", handleTouchEnd);
+
+        return () => {
+            div.removeEventListener("touchstart", handleTouchStart);
+            div.removeEventListener("touchmove", handleTouchMove);
+            div.removeEventListener("touchend", handleTouchEnd);
+        };
+    }, [state.tileSize, color]);
+
     return (
         <main className={styles.main}>
             <div className={styles["color-picker"]}>
@@ -352,20 +383,18 @@ export default function Crosswords() {
                     row.map((letter, x) => (
                         <span
                             key={x + "-" + y}
-                            onMouseDown={(e) =>
+                            onMouseDown={() =>
                                 dispatch({
                                     type: "HANDLE_MOUSE_DOWN",
                                     payload: {
-                                        e: e.target,
                                         position: { x, y }
                                     }
                                 })
                             }
-                            onMouseUp={(e) =>
+                            onMouseUp={() =>
                                 dispatch({
                                     type: "HANDLE_MOUSE_UP",
                                     payload: {
-                                        e: e.target,
                                         position: { x, y },
                                         color: color
                                     }

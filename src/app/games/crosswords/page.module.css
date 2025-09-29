@@ -15,6 +15,7 @@
     grid-template-columns: repeat(var(--size), 1fr);
     grid-template-rows: repeat(var(--size), 1fr);
     position: relative;
+    touch-action: none;
 
     & span {
         font-size: 1.4rem;
@@ -27,6 +28,7 @@
         border-radius: 1vmin;
         user-select: none;
         text-transform: uppercase;
+        touch-action: none;
     }
 
     & .canvas {
@@ -117,5 +119,25 @@
 
     & .selected {
         outline: 2px solid hsl(0, 0%, 90%);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .main {
+        flex-direction: column;
+        & .color-picker {
+            flex-direction: row;
+            width: 90%;
+            height: 5rem;
+            justify-content: center;
+            align-items: center;
+            & .color-picker-option {
+                width: 2rem;
+                height: 100%;
+            }
+        }
+        & .crosswords {
+            max-width: 90%;
+        }
     }
 }

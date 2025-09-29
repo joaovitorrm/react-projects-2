@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "deploy": "npm run build && node deploy.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "react": "19.1.0",
