@@ -3,6 +3,7 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import styles from "./page.module.css";
 import palavrasJSON from "./palavras.json";
+import { useTimer } from "@/hooks/useTimer";
 
 const colors = [
     "hsl(0, 100%, 50%)",
@@ -38,6 +39,7 @@ interface State {
     tempLine: Line,
     dragging: boolean,
     words: string[],
+    ended: boolean
 }
 
 type Action =
@@ -45,12 +47,28 @@ type Action =
     { type: "HANDLE_MOUSE_DOWN", payload: { position: { x: number, y: number } } } |
     { type: "HANDLE_MOUSE_UP", payload: { position: { x: number, y: number }, color: ColorType } } |
     { type: "HANDLE_MOUSE_MOVE", payload: { position: { x: number, y: number } } } |
-    { type: "SET_TILE_SIZE", payload: { size: number } };
+    { type: "SET_TILE_SIZE", payload: { size: number } } |
+    { type: "RESTART" } |
+    { type: "SET_END_GAME", payload: boolean };
 
 function reducer(state: State, action: Action) {
     switch (action.type) {
 
         case "SET_TILE_SIZE": return { ...state, tileSize: action.payload.size };
+
+        case "SET_END_GAME": return { ...state, ended: action.payload };
+
+        case "RESTART": {
+            return {
+                ...state,
+                grid: [],
+                draweds: [],
+                tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
+                dragging: false,
+                words: [],
+                ended: false
+            };
+        }
 
         case "HANDLE_MOUSE_DOWN": {
             const tempLine = {
@@ -228,7 +246,7 @@ function reducer(state: State, action: Action) {
                 }
             }
 
-            return { ...state, grid: grid, words: usedWords };
+            return { ...state, grid: grid, words: usedWords.sort() };
         }
         default:
             return state;
@@ -274,19 +292,23 @@ export default function Crosswords() {
             tileSize: 0,
             tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
             dragging: false,
-            words: []
+            words: [],
+            ended: false
         });
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const crosswordsRef = useRef<HTMLDivElement | null>(null);
     const [color, setColor] = useState<ColorType>({ type: "selector", color: "red" });
+    const timer = useTimer();
 
     useEffect(() => {
         if (state.grid.length === 0) {
             dispatch({ type: "GENERATE_GRID", payload: { size: gridSize } });
+            timer.reset();
+            timer.start();
         }
-    }, []);
+    }, [state.grid.length]);
 
     useEffect(() => {
         if (crosswordsRef.current && canvasRef.current) {
@@ -308,6 +330,11 @@ export default function Crosswords() {
             drawLine(contextRef.current, d.line, d.color.color);
         }
 
+        if (state.grid.length > 0 && state.draweds.length >= state.words.length) {
+            dispatch({ type: "SET_END_GAME", payload: true });
+            timer.pause();
+        }
+
         if (state.dragging) {
             const linePos: Line = {
                 start: {
@@ -322,7 +349,7 @@ export default function Crosswords() {
             drawLine(contextRef.current, linePos);
         }
 
-    }, [state.draweds, state.tempLine]);
+    }, [state.draweds, state.tempLine, state.words]);
 
     useEffect(() => {
         const div = crosswordsRef.current;
@@ -419,9 +446,14 @@ export default function Crosswords() {
                     ))
                 ))}
                 <canvas ref={canvasRef} className={styles.canvas}></canvas>
+                <div className={`${styles["end-screen"]} ${state.ended ? styles.active : ""}`}>
+                    <h2>FIM DE JOGO!</h2>
+                    <p>Parabéns, você encontrou todas as palavras em <b className={styles.time}>{timer.time(false)}</b></p>
+                    <input type="button" value={"REINICIAR"} onClick={() => dispatch({ type: "RESTART" })}/>
+                </div>
             </div>
             <div className={styles.words}>
-                {state.words.sort().map((word, index) => (
+                {state.words.map((word, index) => (
                     <span key={index} className={state.draweds.find(d => d.word.toUpperCase() === word.toUpperCase()) ? styles.inactive : styles.active}>{word}</span>
                 ))}
             </div>
