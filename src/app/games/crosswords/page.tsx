@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import palavrasJSON from "./palavras.json";
 import { useTimer } from "@/hooks/useTimer";
 
+// PRE-SELECTED COLORS
 const colors = [
     "hsl(0, 100%, 50%)",
     "hsl(25, 100%, 50%)",
@@ -14,6 +15,18 @@ const colors = [
     "hsl(220, 100%, 50%)",
     "hsl(260, 100%, 50%)",
 ];
+
+// DIRECTIONS PATH 
+const directionsPath = {
+    up: { x: 0, y: -1 },
+    down: { x: 0, y: 1 },
+    left: { x: -1, y: 0 },
+    right: { x: 1, y: 0 },
+    upRight: { x: 1, y: -1 },
+    downRight: { x: 1, y: 1 },
+    downLeft: { x: -1, y: 1 },
+    upLeft: { x: -1, y: -1 }
+}
 
 type ColorType =
     { type: "selector", color: string } |
@@ -97,7 +110,6 @@ function reducer(state: State, action: Action) {
 
         case "HANDLE_MOUSE_UP": {
 
-            // CHECK IF IS ALIGNED 8 DIRECTIONS
             if (!isAligned8Directions(state.tempLine)) {
                 return {
                     ...state,
@@ -106,36 +118,39 @@ function reducer(state: State, action: Action) {
                 };
             }
 
-            // CHECK IF IS A VALID WORD
             const dx = state.tempLine.end.x - state.tempLine.start.x;
             const dy = state.tempLine.end.y - state.tempLine.start.y;
 
             const horizontalDir = Math.sign(dx); // -1 0 ou 1
             const verticalDir = Math.sign(dy); // -1 0 ou 1
 
+            // GET THE WORD FROM THE TEMP LINE
             const word = Array.from({ length: (Math.max(Math.abs(dx), Math.abs(dy)) + 1) }, (_, i) =>
                 state.grid[state.tempLine.start.y + verticalDir * i][state.tempLine.start.x + horizontalDir * i]
             ).join("");
 
-            if (!state.words.includes(word)) {
-                return {
-                    ...state,
-                    tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
-                    dragging: false
-                };
-            }
+            // CHECK IF THE WORD EXISTS IN THE CREATED WORDS LIST
+            if (!state.words.includes(word)) return {
+                ...state,
+                tempLine: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } },
+                dragging: false
+            };
 
-            // CHECK IF THE WORD IS ALREADY DRAWED THEN JUST CHANGE THE COLOR
-            const drawedsCopy = [...state.draweds];
-            const found = drawedsCopy.find(drawed => drawed.word === word);
 
+            // GET THE COLOR
             const newColor: ColorType = { ...action.payload.color };
+
+            // CHECK IF THE COLOR IS RAINBOW THEN GET A RANDOM COLOR
             if (newColor.type === "rainbow") {
                 const r = Math.floor(Math.random() * 256);
                 const g = Math.floor(Math.random() * 256);
                 const b = Math.floor(Math.random() * 256);
                 newColor.color = `rgb(${r}, ${g}, ${b})`;
             }
+
+            // CHECK IF THE WORD IS ALREADY DRAWED THEN JUST CHANGE THE COLOR
+            const drawedsCopy = [...state.draweds];
+            const found = drawedsCopy.find(drawed => drawed.word === word);
 
             if (found) {
                 found.color.color = newColor.color;
@@ -147,7 +162,7 @@ function reducer(state: State, action: Action) {
                 };
             }
 
-            // DRAW THE LINE
+            // SETS THE LINE TO BE DRAWED
             const drawedLine: Line = {
                 start: {
                     x: state.tempLine.start.x * state.tileSize + state.tileSize / 2,
@@ -165,29 +180,29 @@ function reducer(state: State, action: Action) {
 
         case "GENERATE_GRID": {
 
+            // CREATEAS AND EMPTY GRID WITH ""
             const grid = Array.from({ length: action.payload.size }, () => Array.from({ length: action.payload.size }, () => ""));
 
-            const wordsAmount = 16;
+            // AMOUNT OF WORDS THAT WILL TRY TO BE PLACED
+            const wordsAmount = 20;
+
+            // GET ALL THE WORDS AND CREATES A COPY
             const words = [...palavrasJSON.palavras] as string[];
+
             const usedWords = [] as string[];
 
-            const directionsPath = {
-                up: { x: 0, y: -1 },
-                down: { x: 0, y: 1 },
-                left: { x: -1, y: 0 },
-                right: { x: 1, y: 0 },
-                upRight: { x: 1, y: -1 },
-                downRight: { x: 1, y: 1 },
-                downLeft: { x: -1, y: 1 },
-                upLeft: { x: -1, y: -1 }
-            }
-
             for (let i = 0; i < wordsAmount; i++) {
+                // GET A RANDOM WORD
                 const randomWord = words.splice(Math.floor(Math.random() * words.length), 1)[0];
 
+                // CHECK IF THE WORD IS BIGGER THAN THE GRID
                 if (randomWord.length > action.payload.size) continue;
 
-                for (let c = 0; c < wordsAmount * 10; c++) {
+                const places = {} as { [key: string]: boolean };
+
+                // TRYES TO GET A RANDOM POSITION FOR THE WORD 10 TIMES
+                for (let c = 0; c < wordsAmount * 15; c++) {
+                    // WILL BE TRUE IF THE WORD CAN BE PLACED IN THAT DIRECTION
                     const directions = {
                         up: false,
                         down: false,
@@ -199,19 +214,53 @@ function reducer(state: State, action: Action) {
                         upLeft: false
                     }
 
-                    const x = Math.floor(Math.random() * action.payload.size);
-                    const y = Math.floor(Math.random() * action.payload.size);
+                    let x = 0, y = 0;
+                    // GET A RANDOM POSITION AND CHECKS IF IT IS ALREADY USED, TRYS 10 TIMES
+                    for (let j = 0; j < 10; j++) {
+                        x = Math.floor(Math.random() * action.payload.size);
+                        y = Math.floor(Math.random() * action.payload.size);
+                        if (!places[`${x}-${y}`]) break;
+                    }
+                    places[`${x}-${y}`] = true;
 
+                    // CHECK ALL THE DIRECTIONS
                     if (x + randomWord.length <= action.payload.size) directions.right = true;
                     if (y + randomWord.length <= action.payload.size) directions.down = true;
                     if (y - randomWord.length >= 0) directions.up = true;
                     if (x - randomWord.length >= 0) directions.left = true;
 
-                    if (directions.up && directions.right) directions.upRight = true;
-                    if (directions.down && directions.right) directions.downRight = true;
-                    if (directions.down && directions.left) directions.downLeft = true;
-                    if (directions.up && directions.left) directions.upLeft = true;
+                    if (directions.up && directions.right) {
+                        directions.upRight = true;
+                        // JUST TO MAKE IT HARDER, REMOVE THE DIRECTION 50% OF THE TIME
+                        if (Math.floor(Math.random() * 2) === 1) {
+                            directions.right = false;
+                            directions.up = false;
+                        };
+                    };
+                    if (directions.down && directions.right) {
+                        directions.downRight = true;
+                        if (Math.floor(Math.random() * 2) === 1) {
+                            directions.down = false;
+                            directions.right = false;
+                        };
+                    }
 
+                    if (directions.down && directions.left) {
+                        directions.downLeft = true;
+                        if (Math.floor(Math.random() * 2) === 1) {
+                            directions.down = false;
+                            directions.left = false;
+                        }
+                    };
+                    if (directions.up && directions.left) {
+                        directions.upLeft = true;
+                        if (Math.floor(Math.random() * 2) === 1) {
+                            directions.up = false;
+                            directions.left = false;
+                        }
+                    };
+
+                    // REMOVE ALL THE DIRECTIONS THAT CAN'T BE USED
                     for (const direction in directions) {
                         const dir = direction as keyof typeof directions;
                         if (!directions[dir]) {
@@ -227,6 +276,7 @@ function reducer(state: State, action: Action) {
                             }
                         }
                     }
+                    // IF THERE IS A DIRECTION THAT CAN BE USED, CHOSE RANDOMLY AND USE IT
                     if (Object.keys(directions).length > 0) {
                         const randomDir = Object.keys(directions)[Math.floor(Math.random() * Object.keys(directions).length)];
                         for (let k = 0; k < randomWord.length; k++) {
@@ -238,6 +288,7 @@ function reducer(state: State, action: Action) {
                 }
             }
 
+            // FILL THE REST OF THE GRID
             for (let y = 0; y < action.payload.size; y++) {
                 for (let x = 0; x < action.payload.size; x++) {
                     if (grid[y][x] !== "") continue;
@@ -253,10 +304,7 @@ function reducer(state: State, action: Action) {
     }
 }
 
-function drawLine(ctx: CanvasRenderingContext2D, line: Line, color: string = "black", width: number = 15) {
-    ctx.globalAlpha = 0.3;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
+function drawLine(ctx: CanvasRenderingContext2D, line: Line, color: string = "black") {
     ctx.strokeStyle = color;
 
     ctx.beginPath();
@@ -284,7 +332,7 @@ function isAligned8Directions(line: Line) {
 
 export default function Crosswords() {
 
-    const gridSize = 10;
+    const gridSize = 11;
     const [state, dispatch] = useReducer(reducer,
         {
             grid: [],
@@ -299,6 +347,7 @@ export default function Crosswords() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const crosswordsRef = useRef<HTMLDivElement | null>(null);
+
     const [color, setColor] = useState<ColorType>({ type: "selector", color: "red" });
     const timer = useTimer();
 
@@ -315,6 +364,11 @@ export default function Crosswords() {
             canvasRef.current.width = crosswordsRef.current.offsetWidth;
             canvasRef.current.height = crosswordsRef.current.offsetHeight;
             contextRef.current = canvasRef.current.getContext("2d");
+
+            const ctx = contextRef.current!;
+            ctx.globalAlpha = 0.3;
+            ctx.lineWidth = 15;
+            ctx.lineCap = "round";
 
             const size = canvasRef.current.offsetWidth / gridSize;
             dispatch({ type: "SET_TILE_SIZE", payload: { size } });
@@ -449,7 +503,7 @@ export default function Crosswords() {
                 <div className={`${styles["end-screen"]} ${state.ended ? styles.active : ""}`}>
                     <h2>FIM DE JOGO!</h2>
                     <p>Parabéns, você encontrou todas as palavras em <b className={styles.time}>{timer.time(false)}</b></p>
-                    <input type="button" value={"REINICIAR"} onClick={() => dispatch({ type: "RESTART" })}/>
+                    <input type="button" value={"REINICIAR"} onClick={() => dispatch({ type: "RESTART" })} />
                 </div>
             </div>
             <div className={styles.words}>
