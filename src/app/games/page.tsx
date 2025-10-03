@@ -35,11 +35,17 @@ export default function Games() {
 
     return (
         <main className={styles.main}>
-            <ul>
-                {projects.map((project, index) => (
-                    <Game key={index} {...project} />
-                ))}
-            </ul>
+            <section>
+                <ul>
+                    {projects.map((project, index) => (
+                        <li key={index}>
+                            <article>
+                                <Game {...project} />
+                            </article>
+                        </li>
+                    ))}
+                </ul>
+            </section>
         </main>
     )
 }

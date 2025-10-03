@@ -16,7 +16,7 @@ const colors = [
     "hsl(260, 100%, 50%)",
 ];
 
-// DIRECTIONS PATH 
+// DIRECTIONS PATH
 const directionsPath = {
     up: { x: 0, y: -1 },
     down: { x: 0, y: 1 },

@@ -1,0 +1,7 @@
+{
+    "name": "Nonogram",
+    "description": "Encontre as linhas e colunas escondidas no tabuleiro.",
+    "version": "1.0",
+    "image": "nonogram",
+    "link": "games/nonogram"
+}
