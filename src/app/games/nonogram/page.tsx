@@ -86,7 +86,7 @@ function reducer(state: ReducerProps, action: Action) {
             if (type === "FILL") {
                 if (state.grid[action.payload.index] === 1) {
                     drawed[action.payload.index] = 1;
-                } else if (state.grid[action.payload.index] === -1) {
+                } else if (state.grid[action.payload.index] === -1 && drawed[action.payload.index] !== -1) {
                     drawed[action.payload.index] = -2;
                     lives--;
                 }
