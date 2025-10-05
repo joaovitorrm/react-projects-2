@@ -9,6 +9,7 @@
         position: relative;
         display: grid;
         margin-block: 1rem;
+        user-select: none;
         grid-template:
             ". vh" auto
             "hh n" 1fr
@@ -192,7 +193,7 @@
                 }
             }
 
-            & .settings-container,
+            & .settings-icon-container,
             .hint-container {
                 height: 100%;
                 aspect-ratio: 1/1;
@@ -202,6 +203,25 @@
                 border: none;
                 cursor: pointer;
                 user-select: none;
+            }            
+
+            & .hint-container {
+                position: relative;
+                & .amount {
+                    position: absolute;
+                    color: hsl(0, 0%, 90%);
+                    font-size: 0.8rem;
+                    width: 40%;
+                    height: 40%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border-radius: 50%;
+                    top: -5%;
+                    right: -5%;
+                    font-family: Verdana, Geneva, Tahoma, sans-serif;
+                    background-color: hsl(0, 60%, 40%);
+                }
             }
 
             & .settings-icon,
@@ -213,6 +233,67 @@
                 filter: invert(1);
             }
 
+        }
+
+        & .settings-container {
+            position: absolute;
+            height: 60%;
+            width: 60%;
+            background-color: hsl(0, 0%, 16%);
+            margin: auto;
+            inset: 0;
+            offset: 0;
+            display: none;
+            justify-content: space-between;
+            align-items: start;
+            flex-direction: column;
+            color: hsl(0, 0%, 90%);
+            border-radius: 1vmin;
+            gap: 1.4rem;
+            padding-inline: 1.5rem;
+            padding-block: 2rem;
+
+            &.active {
+                display: flex;
+            }
+
+            & h2 {
+                text-align: center;
+                width: 100%;
+            }
+
+            & .option-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+
+                & ul {
+                    list-style-type: none;
+                    display: flex;
+                    gap: 0.3rem;
+                    justify-content: space-evenly;
+                    width: 100%;
+                }
+            }
+
+            & button {
+                padding-inline: 1.1rem;
+                padding-block: 0.6rem;
+                background-color: hsl(0, 0%, 25%);
+                border: none;
+                color: hsl(0, 0%, 95%);
+                border-radius: 0.8vmin;
+                cursor: pointer;
+                user-select: none;
+                &.active {
+                    background-color: hsl(0, 60%, 40%);
+                }
+            }
+
+            & .reset-btn-container, .reset-btn {
+                width: 100%;
+            }
         }
 
         & .end-container {
@@ -246,6 +327,7 @@
                 & p {
                     font-size: 1.2rem;
                     line-height: 1.8rem;
+
                     & b {
                         background-color: hsl(0, 0%, 8%);
                         padding-inline: 0.5rem;
