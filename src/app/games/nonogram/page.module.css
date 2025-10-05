@@ -203,10 +203,11 @@
                 border: none;
                 cursor: pointer;
                 user-select: none;
-            }            
+            }
 
             & .hint-container {
                 position: relative;
+
                 & .amount {
                     position: absolute;
                     color: hsl(0, 0%, 90%);
@@ -286,12 +287,14 @@
                 border-radius: 0.8vmin;
                 cursor: pointer;
                 user-select: none;
+
                 &.active {
                     background-color: hsl(0, 60%, 40%);
                 }
             }
 
-            & .reset-btn-container, .reset-btn {
+            & .reset-btn-container,
+            .reset-btn {
                 width: 100%;
             }
         }
@@ -349,4 +352,25 @@
             }
         }
     }
+}
+
+@media screen and (max-width: 600px) {
+    .main {
+        & .nonogram-container {
+            width: 95%;
+            min-height: 0;
+            min-width: 0;
+
+            & .settings-container {
+                width: 70%;
+                height: 70%;
+            }
+        }
+
+        & .end {
+            max-width: 75% !important;
+        }
+
+    }
+
 }
