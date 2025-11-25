@@ -11,9 +11,9 @@ export default function Header() {
     return (
         <header className={styles.header}>
             <ul>
-                <li><Link className={`${styles["label"]} ${pathName === "/games" ? styles.active : ""}`} href="/games">Games</Link></li>
-                <li><Link className={`${styles["label"]} ${pathName === "/projects" ? styles.active : ""}`} href="/projects">Projects</Link></li>
-                <li><Link className={`${styles["label"]} ${pathName === "/about" ? styles.active : ""}`} href="/about">About</Link></li>
+                <li><Link className={`${styles["label"]} ${pathName === "/games" ? styles.active : ""}`} href="/games">Jogos</Link></li>
+                <li><Link className={`${styles["label"]} ${pathName === "/projects" ? styles.active : ""}`} href="/projects">Projetos</Link></li>
+                <li><Link className={`${styles["label"]} ${pathName === "/about" ? styles.active : ""}`} href="/about">Sobre</Link></li>
             </ul>
         </header>
     )
