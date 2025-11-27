@@ -1,7 +1,7 @@
 {
-    "name": "Cruzadinhas",
+    "name": "Caça Palavras",
     "description": "Encontre as palavras escondidas no tabuleiro de cruzadas.",
     "version": "1.0",
-    "image": "cruzadinhas",
-    "link": "games/crosswords"
+    "image": "wordSearch",
+    "link": "games/wordSearch"
 }
