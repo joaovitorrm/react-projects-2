@@ -1,0 +1,7 @@
+{
+    "name": "Palavras Cruzadas",
+    "description": "Encontre as palavras escondidas no tabuleiro de cruzadas.",
+    "version": "1.0",
+    "image": "placeholder",
+    "link": "games/crossword"
+}

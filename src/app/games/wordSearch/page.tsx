@@ -330,7 +330,7 @@ function isAligned8Directions(line: Line) {
     return false;
 }
 
-export default function Crosswords() {
+export default function WordSearch() {
 
     const gridSize = 11;
     const [state, dispatch] = useReducer(reducer,
