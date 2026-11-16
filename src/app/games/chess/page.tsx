@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react"
 import styles from "./page.module.css"
 
+const BOARD_SIZE = 8;
+
 const piecesNames = {
     king: { white: "♔", black: "♚" },
     queen: { white: "♕", black: "♛" },
@@ -36,7 +38,7 @@ type Piece = {
 type Grid = (Piece | null)[][];
 
 function isOutOfGrid(x: number, y: number): boolean {
-    return (x < 0 || x > 7 || y < 0 || y > 7);
+    return (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE);
 }
 
 function isInCheck(grid: Grid, color: "white" | "black"): boolean {
@@ -229,6 +231,21 @@ const validMoves: Record<PiecesNames, (grid: Grid, x: number, y: number) => Vali
     },
 }
 
+function generateGrid(): (Piece | null)[][] {
+    const size = BOARD_SIZE;
+    const createdGrid = Array.from({ length: size }, () => new Array<Piece | null>(size).fill(null));
+
+    piecesStartPatternBlack.forEach((p, i) => {
+        createdGrid[Math.floor(i / size)][i - Math.floor(i / size) * size] = { color: "black", name: p, hasMoved: false };
+    })
+
+    piecesStartPatternWhite.forEach((p, i) => {
+        createdGrid[Math.floor(i / size + size - 2)][i - Math.floor(i / size) * size] = { color: "white", name: p, hasMoved: false };
+    })
+
+    return createdGrid;
+}
+
 type OverlayElement = {
     type: "move" | "attack",
     action: (grid: Grid, x: number, y: number) => void,
@@ -236,42 +253,51 @@ type OverlayElement = {
     y: number,
 }
 
+function Timer({ running, initialTime }: { running: boolean, initialTime: number }) {
+    const [seconds, setSeconds] = useState(initialTime);
+
+    useEffect(() => {
+        if (!running) return;
+        const id = setInterval(() => setSeconds(s => Math.max(0, s - 1)), 1000);
+        return () => clearInterval(id);
+    }, [running]);
+
+    const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const ss = String(seconds % 60).padStart(2, "0");
+    return <span className={styles["timer"]}>{mm}:{ss}</span>;
+}
+
 export default function Chess() {
 
-    const BOARD_SIZE = 8;
     const [gameGrid, setGameGrid] = useState<Grid>([]);
     const [overlayElements, setOverlayElements] = useState<OverlayElement[]>([]);
     const [playerTurnColor, setPlayerTurnColor] = useState<"black" | "white">("white");
-
-    const generateGrid = useCallback(() => {
-        const createdGrid = Array.from({ length: BOARD_SIZE }, () => new Array<Piece | null>(BOARD_SIZE).fill(null));
-
-        piecesStartPatternBlack.forEach((p, i) => {
-            createdGrid[Math.floor(i / BOARD_SIZE)][i - Math.floor(i / BOARD_SIZE) * BOARD_SIZE] = { color: "black", name: p, hasMoved: false };
-        })
-
-        piecesStartPatternWhite.forEach((p, i) => {
-            createdGrid[Math.floor(i / BOARD_SIZE + BOARD_SIZE - 2)][i - Math.floor(i / BOARD_SIZE) * BOARD_SIZE] = { color: "white", name: p, hasMoved: false };
-        })
-
-        setGameGrid(createdGrid);
-    }, []);
+    const [flipBoard, setFlipBoard] = useState<boolean>(false);
+    const [gameId, setGameId] = useState<number>(0);
+    const [gameStarted, setGameStarted] = useState<boolean>(false);
 
     useEffect(() => {
-        generateGrid();
+        resetGame();
     }, []);
-
-    /* useEffect(() => {
-        if (!gameGrid || gameGrid.length === 0) return;
-        //console.log(validMoves["pawn"](gameGrid, 0, 2))
-    }, [gameGrid]) */
 
     const movePiece = useCallback((grid: Grid, fromX: number, fromY: number, toX: number, toY: number) => {
         setGameGrid(applyMove(grid, fromX, fromY, toX, toY));
         setOverlayElements([]);
         setPlayerTurnColor(prev => prev === "black" ? "white" : "black");
 
-    }, [playerTurnColor]);
+        if (playerTurnColor === "black" && !gameStarted) 
+            setGameStarted(true);
+        
+
+    }, [playerTurnColor, gameStarted]);
+
+    const resetGame = useCallback(() => {
+        setPlayerTurnColor("white");
+        setGameGrid(generateGrid());
+        setGameId(prev => prev + 1);
+        setGameStarted(false);
+    }, [])
+
 
     const handlePieceClick = useCallback((grid: Grid, x: number, y: number) => {
 
@@ -298,17 +324,31 @@ export default function Chess() {
         <main className={styles.main}>
 
             <article className={styles["chess"]}>
-                <article className={styles["chess-grid"]}>
+                <article className={`${styles["chess-grid"]} ${flipBoard ? styles["flip"] : undefined}`}>
                     {gameGrid.map((row, y) =>
                         row.map((p, x) => {
                             const overlay = overlayElements.find(o => o.x === x && o.y === y);
                             return (
                                 <div key={x + (BOARD_SIZE * y)} className={`${styles["tile"]} ${styles[(x + y) % 2 === 0 ? "white" : "black"]}`} onClick={() => setOverlayElements([])}>
-                                    <span onClick={(e) => { e.stopPropagation(); handlePieceClick(gameGrid, x, y) }}>{p && piecesNames[p.name][p.color]}</span>
+                                    <span onClick={(e) => { e.stopPropagation(); handlePieceClick(gameGrid, x, y) }} className={p ? styles[p?.color] : undefined}>{p && piecesNames[p.name][p.color]}</span>
                                     {overlay && <div className={styles[overlay.type]} onClick={(e) => { e.stopPropagation(); overlay.action(gameGrid, x, y) }}></div>}
                                 </div>)
                         })
                     )}
+                </article>
+                <article className={styles["chess-info"]}>
+                    <div className={styles["timer-container"]}>
+                        <Timer initialTime={300} running={gameStarted && playerTurnColor === "black"} key={gameId}/>
+                        {playerTurnColor === "black" && <span className={styles["turn"]}>Vez</span>}
+                    </div>
+                    <div className={styles["infos"]}>
+                        <button onClick={() => setFlipBoard(prev => !prev)}>FLIP</button>
+                        <button onClick={() => resetGame()}>RESET</button>
+                    </div>
+                    <div className={styles["timer-container"]}>
+                        <Timer initialTime={300} running={gameStarted && playerTurnColor === "white"} key={gameId+1}/>
+                        {playerTurnColor === "white" && <span className={styles["turn"]}>Vez</span>}
+                    </div>
                 </article>
             </article>
 

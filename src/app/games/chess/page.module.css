@@ -6,13 +6,28 @@
 }
 
 .chess {
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: ". b i";
+
+    align-items: center;
+
     & .chess-grid {
         height: 35rem;
         aspect-ratio: 1/1;
-        outline: 6px solid hsl(20, 40%, 20%);
         display: grid;
+        grid-area: b;
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(8, 1fr);
+
+        &.flip {
+            transform: rotate(180deg);
+
+            & *>span {
+                transform: rotate(180deg);
+            }
+        }
 
         & .tile {
             width: 100%;
@@ -33,6 +48,16 @@
 
             & span {
                 cursor: pointer;
+
+                &.black {
+                    color: hsl(0, 0%, 0%);
+                }
+
+                &.white {
+                    font-weight: bolder;
+                    color: white;
+                    -webkit-text-stroke: 1px hsla(0, 0%, 6%, 0.6);
+                }
             }
 
             & .move {
@@ -62,6 +87,34 @@
                 background: radial-gradient(transparent 65%, hsla(0, 0%, 10%, 0.2) 35%);
                 cursor: grab;
             }
+        }
+    }
+
+    & .chess-info {
+        background-color: hsl(0, 0%, 6%);
+        grid-area: i;
+        height: 20rem;
+        width: 12rem;
+        display: flex;
+        flex-direction: column;
+        padding-inline: 0.4rem;
+
+        & .timer-container {
+            & .timer {
+                font-size: 3rem;
+                color: hsl(0, 0%, 90%);
+            }
+            & .turn {
+                color: hsl(0, 0%, 80%);
+                background-color: hsl(0, 0%, 14%);
+                padding: 0.1rem 0.5rem;
+                border-radius: .5rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        & .infos {
+            flex: 1;
         }
     }
 }
