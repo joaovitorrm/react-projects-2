@@ -1,8 +1,9 @@
-import { StaticImageData } from "next/image";
 import wordSearchCover from "./wordSearch-cover.png";
 import nonogramCover from "./nonogram-cover.png";
+import { Covers } from "@/types";
 
-export const covers: Record<string, StaticImageData> = {
+export const covers: Covers = {
     "wordSearch": wordSearchCover,
-    "nonogram": nonogramCover
+    "nonogram": nonogramCover,
+    "chess": null
 }
