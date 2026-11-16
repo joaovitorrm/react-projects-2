@@ -1,10 +1,13 @@
 import { GameInfo } from "@/types";
 
-export default {
+const info: GameInfo = {
     name: "Xadrez",
     description: "Projeto jogo de xadrez.",
     version: 0.1,
     imageCoverPath: "chess",
+    loadedImage: null,
     link: "games/chess",
     order: 3
-} as GameInfo;
+}
+
+export default info;
