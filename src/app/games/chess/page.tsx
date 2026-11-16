@@ -75,7 +75,8 @@ function applyMove(grid: Grid, fromX: number, fromY: number, toX: number, toY: n
 
 type ValidMoves = {
     moves: [number, number][],
-    attacks: [number, number][]
+    attacks: [number, number][],
+    special?: [number, number][]
 }
 
 const validMoves: Record<PiecesNames, (grid: Grid, x: number, y: number) => ValidMoves> = {
@@ -112,6 +113,7 @@ const validMoves: Record<PiecesNames, (grid: Grid, x: number, y: number) => Vali
         const piece = grid[y][x]!;
         const moves: [number, number][] = [];
         const attacks: [number, number][] = [];
+        const special: [number, number][] = [];
         const spaces = [[-1, -1], [-1, 0], [-1, 1],
         [0, -1], [0, 1],
         [1, -1], [1, 0], [1, 1]];
@@ -128,14 +130,30 @@ const validMoves: Record<PiecesNames, (grid: Grid, x: number, y: number) => Vali
                 attacks.push([posX, posY]);
         }
 
-        return { moves, attacks };
+        if (!piece.hasMoved) {
+            [1, -1].forEach((n) => {
+                let c = n;
+                while ((x + c) < BOARD_SIZE && (x + c) >= 0) {
+                    if (grid[y][x + c] !== null) {
+                        const p = grid[y][x + c]!
+                        if (p.name === "rook" && !p.hasMoved && p.color === piece.color) {
+                            special.push([n > 0 ? x + 2 : x - 2, y]);
+                        }
+                        break;
+                    }
+                    if (wouldBeInCheck(grid, x, y, x + c, y)) break;
+                    c += n;
+                }
+            })
+        }
+
+        return { moves, attacks, special };
     },
     knight: (grid: Grid, x: number, y: number) => {
 
         const piece = grid[y][x]!;
         const moves: [number, number][] = [];
         const attacks: [number, number][] = [];
-
         const color = piece.color;
 
         const spaces = [[-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2], [-1, -2]];
@@ -159,7 +177,7 @@ const validMoves: Record<PiecesNames, (grid: Grid, x: number, y: number) => Vali
         const piece = grid[y][x]!;
         const moves: [number, number][] = [];
         const attacks: [number, number][] = [];
-
+        const special: [number, number][] = [];
         const dir = piece.color === "black" ? 1 : -1;
 
         if (grid[y + dir]?.[x] === null) {
@@ -174,7 +192,7 @@ const validMoves: Record<PiecesNames, (grid: Grid, x: number, y: number) => Vali
                 attacks.push([x + v, y + dir]);
         })
 
-        return { moves, attacks };
+        return { moves, attacks, special };
     },
     queen: (grid: Grid, x: number, y: number) => {
         const piece = grid[y][x]!;
@@ -246,6 +264,22 @@ function generateGrid(): (Piece | null)[][] {
     return createdGrid;
 }
 
+function checkIsMate(grid: Grid, color: "black" | "white"): boolean {
+    let hasMove = 0;
+    grid.forEach((row, y) => row.forEach((p, x) => {
+        if (p === null || p.color !== color) return;
+
+        const result = validMoves[p.name](grid, x, y);
+
+        const moves = result.moves.filter(([mx, my]) => !wouldBeInCheck(grid, x, y, mx, my));
+        const attacks = result.attacks.filter(([mx, my]) => !wouldBeInCheck(grid, x, y, mx, my));
+
+        if (moves.length > 0 || attacks.length > 0) hasMove++;
+    }));
+
+    return hasMove === 0;
+}
+
 type OverlayElement = {
     type: "move" | "attack",
     action: (grid: Grid, x: number, y: number) => void,
@@ -274,28 +308,48 @@ export default function Chess() {
     const [playerTurnColor, setPlayerTurnColor] = useState<"black" | "white">("white");
     const [flipBoard, setFlipBoard] = useState<boolean>(false);
     const [gameId, setGameId] = useState<number>(0);
-    const [gameStarted, setGameStarted] = useState<boolean>(false);
+    const [gameRunning, setGameRunning] = useState<boolean>(false);
 
     useEffect(() => {
         resetGame();
     }, []);
 
+    useEffect(() => {
+
+        if (gameGrid.length === 0) return;
+
+        if (checkIsMate(gameGrid, playerTurnColor)) {
+            alert("CHECKMATE");
+            setGameRunning(false);
+        }
+    }, [gameGrid, playerTurnColor])
+
     const movePiece = useCallback((grid: Grid, fromX: number, fromY: number, toX: number, toY: number) => {
-        setGameGrid(applyMove(grid, fromX, fromY, toX, toY));
+
+        let newGrid = applyMove(grid, fromX, fromY, toX, toY);
+
+        // roque: o rei andou 2 casas, então move a torre para o lado dele      
+        if (grid[fromY][fromX]!.name === "king" && Math.abs(toX - fromX) === 2) {
+            const dir = toX > fromX ? 1 : -1;
+            const rookX = dir === 1 ? BOARD_SIZE - 1 : 0;
+            newGrid = applyMove(newGrid, rookX, fromY, toX - dir, fromY);
+        }
+
+        setGameGrid(newGrid);
         setOverlayElements([]);
         setPlayerTurnColor(prev => prev === "black" ? "white" : "black");
 
-        if (playerTurnColor === "black" && !gameStarted) 
-            setGameStarted(true);
-        
+        if (playerTurnColor === "black" && !gameRunning)
+            setGameRunning(true);
 
-    }, [playerTurnColor, gameStarted]);
+
+    }, [playerTurnColor, gameRunning]);
 
     const resetGame = useCallback(() => {
         setPlayerTurnColor("white");
         setGameGrid(generateGrid());
         setGameId(prev => prev + 1);
-        setGameStarted(false);
+        setGameRunning(false);
     }, [])
 
 
@@ -309,11 +363,14 @@ export default function Chess() {
 
         const moves = result.moves.filter(([mx, my]) => !wouldBeInCheck(grid, x, y, mx, my));
         const attacks = result.attacks.filter(([mx, my]) => !wouldBeInCheck(grid, x, y, mx, my));
+        const specials = result.special?.filter(([mx, my]) => !wouldBeInCheck(grid, x, y, mx, my));
 
         const overlays: OverlayElement[] = [];
 
         moves.forEach(([mx, my]) => overlays.push({ type: "move", action: (g) => movePiece(g, x, y, mx, my), x: mx, y: my }));
         attacks.forEach(([mx, my]) => overlays.push({ type: "attack", action: (g) => movePiece(g, x, y, mx, my), x: mx, y: my }));
+        if (specials)
+            specials.forEach(([mx, my]) => overlays.push({ type: "attack", action: (g) => movePiece(g, x, y, mx, my), x: mx, y: my }));
 
         setOverlayElements(overlays);
 
@@ -338,7 +395,7 @@ export default function Chess() {
                 </article>
                 <article className={styles["chess-info"]}>
                     <div className={styles["timer-container"]}>
-                        <Timer initialTime={300} running={gameStarted && playerTurnColor === "black"} key={gameId}/>
+                        <Timer initialTime={300} running={gameRunning && playerTurnColor === "black"} key={gameId} />
                         {playerTurnColor === "black" && <span className={styles["turn"]}>Vez</span>}
                     </div>
                     <div className={styles["infos"]}>
@@ -346,7 +403,7 @@ export default function Chess() {
                         <button onClick={() => resetGame()}>RESET</button>
                     </div>
                     <div className={styles["timer-container"]}>
-                        <Timer initialTime={300} running={gameStarted && playerTurnColor === "white"} key={gameId+1}/>
+                        <Timer initialTime={300} running={gameRunning && playerTurnColor === "white"} key={gameId + 1} />
                         {playerTurnColor === "white" && <span className={styles["turn"]}>Vez</span>}
                     </div>
                 </article>
